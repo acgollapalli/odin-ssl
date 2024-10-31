@@ -826,7 +826,8 @@ SSL_tmp_DH_callback :: #type proc(ssl: SSL, is_export: c.int, keylength: c.int) 
 
 @(default_calling_convention="c")
 foreign lib {
-
+    SSL_FILETYPE_ASN1 : c.int
+    SSL_FILETYPE_PEM : c.int
     /* ssl control macros */
     DTLSv1_get_timeout :: proc(ssl: SSL, arg: rawptr) -> c.long ---
     DTLSv1_handle_timeout :: proc(ssl: SSL) -> c.long ---
