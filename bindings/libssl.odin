@@ -11,7 +11,15 @@ import "core:fmt"
 
 when ODIN_OS == .Darwin {
     foreign import lib {
-	"lib/darwin/tls.a"
+	"lib/darwin/ssl.a"
+    }
+} else when ODIN_OS == .Linux {
+    foreign import lib {
+	"lib/linux/ssl.a"
+    }
+} else when ODIN_OS == .Windows {
+    foreign import lib {
+	"lib/windows/ssl.lib"
     }
 }
 

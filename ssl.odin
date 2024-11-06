@@ -1,33 +1,34 @@
 package ssl
 
 import "core:net"
-import "ssl/libressl"
+import libressl "./bindings"
 import "core:c"
 
 SSL_Context :: libressl.SSL_CTX
 SSL_Connection :: libressl.SSL
+QUIC_Encryption_Level :: libressl.ssl_encryption_level_t
 
 SSL_Error :: enum {
-    SSL_ERROR_NONE = 0,
-    SSL_ERROR_SSL = 1,
-    SSL_ERROR_WANT_READ = 2,
-    SSL_ERROR_WANT_WRITE = 3,
-    SSL_ERROR_WANT_X509_LOOKUP = 4,
-    SSL_ERROR_SYSCALL = 5,
-    SSL_ERROR_ZERO_RETURN = 6,
-    SSL_ERROR_WANT_CONNECT = 7,
-    SSL_ERROR_WANT_ACCEPT = 8,
-    SSL_ERROR_WANT_ASYNC = 9,
-    SSL_ERROR_WANT_ASYNC_JOB = 10,
-    SSL_ERROR_WANT_CLIENT_HELLO_CB = 11,
+    SSL_ERROR_NONE,
+    SSL_ERROR_SSL,
+    SSL_ERROR_WANT_READ,
+    SSL_ERROR_WANT_WRITE,
+    SSL_ERROR_WANT_X509_LOOKUP,
+    SSL_ERROR_SYSCALL,
+    SSL_ERROR_ZERO_RETURN,
+    SSL_ERROR_WANT_CONNECT,
+    SSL_ERROR_WANT_ACCEPT,
+    SSL_ERROR_WANT_ASYNC,
+    SSL_ERROR_WANT_ASYNC_JOB,
+    SSL_ERROR_WANT_CLIENT_HELLO_CB,
 }
 
 Certificate :: enum {
-    ASN1 = (int)libressl.SSL_FILETYPE_ASN1,
-    PEM = (int)libressl.SSL_FILETYPE_PEM
+    ASN1 = 2,
+    PEM = 1,
 }
 
-create_ctx :: proc(certPath: string, pkeyPath: string, certType: Certificate, pkeyType) -> SSL_Context {
+create_ctx :: proc(certPath: string, pkeyPath: string, certType: Certificate, pkeyType: Certificate) -> SSL_Context {
     method := libressl.TLS_method()
     ctx := libressl.SSL_CTX_new(method)
 
@@ -42,21 +43,21 @@ create_ctx :: proc(certPath: string, pkeyPath: string, certType: Certificate, pk
 
 create_conn :: proc(ctx: SSL_Context, port: net.TCP_Socket) -> SSL_Connection {
     conn := libressl.SSL_new(ctx)
-    libressl.SSL_set_fd((int)port)
+    libressl.SSL_set_fd(int(port))
     return conn
 }
 
 accept :: proc(conn: SSL_Connection) -> SSL_Error {
     status :=  SSL_accept(conn)
     if status != 0 {
-	return SSL_Error[(int)status]
+	return SSL_Error[int(status)]
     }
     return nil
 }
 
 // FIXME: We should really be using some sort of reader here
-read_to_string :: proc(conn: SSL_Connection, bytes_wanted = 100) -> string, SSL_Error {
-    buf := [bytes_wanted]u8 // do we need to free this?
+read_to_string :: proc(conn: SSL_Connection, bytes_wanted := 100) -> (string, SSL_Error) {
+    buf := [bytes_wanted]u8{} // do we need to free this?
     bytes_read := -1
     status := SSL_read_ex(conn, &buf, bytes_wanted, &bytes_read)
 
@@ -64,9 +65,9 @@ read_to_string :: proc(conn: SSL_Connection, bytes_wanted = 100) -> string, SSL_
 
     for bytes_read !=0 {
 	if status == 0 {
-	    out += buf[:(int)bytes_read]
+	    out += buf[:int(bytes_readi)]
 	} else {
-	    return "", SSL_Error[(int)status]
+	    return "", SSL_Error[int(status)]
 	}
     }
     return out
@@ -74,10 +75,10 @@ read_to_string :: proc(conn: SSL_Connection, bytes_wanted = 100) -> string, SSL_
 
 // FIXME: what if the buffer is YUGE?
 // we should probably let the caller pass a writer or something
-write_from_buffer :: proc(conn: SSL_Connection, response: []u8) SSL_error {
+write_from_buffer :: proc(conn: SSL_Connection, response: []u8) -> SSL_Error {
     status := SSL_write_ex(conn, &response, len(response))
     if status != 0 {
-	return SSL_ERROR[(int)status]
+	return SSL_ERROR[int(status)]
     }
     return nil
 }
@@ -89,7 +90,7 @@ free_conn :: proc(conn: SSL_Connection) {
     SSL_free(conn)
 }
 
-create_quic_ctx :: proc() SSL_Context, int {
+create_quic_ctx :: proc() -> (SSL_Context, int) {
     method : libressl.SSL_QUIC_METHOD // FIXME: initialize
 
     err := libressl.SSL_CTX_set_quic_method(ctx, &method) or_return
