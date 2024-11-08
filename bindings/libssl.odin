@@ -882,13 +882,13 @@ foreign lib {
     
     SSL_CTX_get_min_proto_version :: proc(ctx: SSL_CTX) -> c.int ---
     SSL_CTX_get_max_proto_version :: proc(ctx: SSL_CTX) -> c.int ---
-    SSL_CTX_set_min_proto_version :: proc(ctx: SSL_CTX, version: c.uint16_t) -> c.int ---
-    SSL_CTX_set_max_proto_version :: proc(ctx: SSL_CTX, version: c.uint16_t) -> c.int ---
+    SSL_CTX_set_min_proto_version :: proc(ctx: SSL_CTX, version: c.long) -> c.int ---
+    SSL_CTX_set_max_proto_version :: proc(ctx: SSL_CTX, version: c.long) -> c.int ---
     
     SSL_get_min_proto_version :: proc(ssl: SSL) -> c.int ---
     SSL_get_max_proto_version :: proc(ssl: SSL) -> c.int ---
-    SSL_set_min_proto_version :: proc(ssl: SSL, version: c.uint16_t) -> c.int ---
-    SSL_set_max_proto_version :: proc(ssl: SSL, version: c.uint16_t) -> c.int ---
+    SSL_set_min_proto_version :: proc(ssl: SSL, version: c.long) -> c.int ---
+    SSL_set_max_proto_version :: proc(ssl: SSL, version: c.long) -> c.int ---
 
     SSL_CTX_get_ssl_method :: proc(ctx: SSL_CTX) -> SSL_METHOD ---
 
