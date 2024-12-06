@@ -120,5 +120,17 @@ create_quic_ctx :: proc(ctx: SSL_Context) -> (SSL_Context, SSL_Error) {
 
 	err := libressl.SSL_CTX_set_quic_method(ctx, &method)
 	return ctx, SSL_Error(err)
+}
 
+provide_quic_data :: proc(
+	ssl: SSL_Connection,
+	level: QUIC_Encryption_Level,
+	data: []u8,
+) {
+	libressl.SSL_provide_quic_data(
+		ssl,
+		transmute(libressl.ssl_encryption_level_t)level,
+		raw_data(data),
+		uint(len(data)),
+	)
 }
