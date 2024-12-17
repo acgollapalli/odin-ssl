@@ -24,7 +24,7 @@ SSL_Error :: enum {
 	SSL_ERROR_WANT_WRITE,
 	SSL_ERROR_WANT_X509_LOOKUP,
 	SSL_ERROR_SYSCALL,
-	SSL_ERROR_ZERO_RETURN,
+	SSL_ERROR_ZERO_RETURNo,
 	SSL_ERROR_WANT_CONNECT,
 	SSL_ERROR_WANT_ACCEPT,
 	SSL_ERROR_WANT_ASYNC,
@@ -32,12 +32,15 @@ SSL_Error :: enum {
 	SSL_ERROR_WANT_CLIENT_HELLO_CB,
 }
 
+SSL_CIPHER :: libressl.SSL_CIPHER
+SSL_QUIC_METHOD :: libressl.SSL_QUIC_METHOD
+
 Certificate :: enum {
 	ASN1 = 2,
 	PEM  = 1,
 }
 
-cipher_name :: proc(cipher: libressl.SSL_CIPHER) -> cstring {
+cipher_name :: proc "c" (cipher: libressl.SSL_CIPHER) -> cstring {
 	return libressl.SSL_CIPHER_get_name(cipher)
 }
 
@@ -59,9 +62,10 @@ create_ctx :: proc(
 	return ctx
 }
 
-create_conn :: proc(ctx: SSL_Context, port: net.TCP_Socket) -> SSL_Connection {
+create_conn :: proc(ctx: SSL_Context, app_data: rawptr) -> SSL_Connection {
 	conn := libressl.SSL_new(ctx)
-	libressl.SSL_set_fd(conn, i32(port))
+	set_app_data(conn, app_data)
+	//libressl.SSL_set_fd(conn, i32(port))
 	return conn
 }
 
@@ -133,4 +137,12 @@ provide_quic_data :: proc(
 		raw_data(data),
 		uint(len(data)),
 	)
+}
+
+set_app_data :: proc "contextless" (ssl: SSL_Connection, app_data: rawptr) {
+	libressl.SSL_set_ex_data(ssl, 0, app_data)
+}
+
+get_app_data :: proc "contextless" (ssl: SSL_Connection) -> rawptr {
+	return libressl.SSL_get_ex_data(ssl, 0, )
 }

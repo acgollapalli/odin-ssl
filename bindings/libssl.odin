@@ -11,7 +11,8 @@ import "core:fmt"
 
 when ODIN_OS == .Darwin {
     foreign import lib {
-	"lib/darwin/ssl.a"
+		"lib/darwin/libssl.a",
+		"lib/darwin/libcrypto.a"
     }
 } else when ODIN_OS == .Linux {
     foreign import lib {
@@ -494,11 +495,11 @@ foreign lib {
 
 
 /* compatibility */
-    SSL_get_app_data :: proc(s: SSL) ---
+    SSL_get_app_data :: proc(s: SSL) -> rawptr ---
     SSL_set_app_data :: proc(s: SSL,arg: rawptr) -> c.int ---
     SSL_SESSION_get_app_data :: proc(s: SSL_CTX) ---
     SSL_SESSION_set_app_data :: proc(s: SSL_SESSION,a: rawptr) -> int ---
-    SSL_CTX_get_app_data :: proc(ctx: SSL_CTX) ---
+    SSL_CTX_get_app_data :: proc(ctx: SSL_CTX) -> rawptr ---
     SSL_CTX_set_app_data :: proc(ctx: SSL_CTX, arg: rawptr) -> int ---
 }
 
