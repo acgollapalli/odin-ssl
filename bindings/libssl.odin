@@ -16,11 +16,12 @@ when ODIN_OS == .Darwin {
     }
 } else when ODIN_OS == .Linux {
     foreign import lib {
-	"lib/linux/ssl.a"
+		"lib/linux/libssl.a",
+		"lib/linux/libcrypto.a"
     }
 } else when ODIN_OS == .Windows {
     foreign import lib {
-	"lib/windows/ssl.lib"
+	"lib/windows/libssl.lib"
     }
 }
 
