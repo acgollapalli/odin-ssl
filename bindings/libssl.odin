@@ -20,9 +20,10 @@ when ODIN_OS == .Darwin {
 		"lib/linux/libcrypto.a"
     }// TODO(caleb): we may need to link against debug vs release builds here as well
 } else when ODIN_OS == .Windows {
-    foreign import lib {
+	foreign import lib {
 	"lib/windows/lib/ssl.lib",
-	"lib/windows/lib/crypto.lib"
+	"lib/windows/lib/crypto.lib",
+	"system:Bcrypt.lib" // HACK(caleb): visual studio does not seem to find bcrypt.lib sometimes
     }
 }
 
