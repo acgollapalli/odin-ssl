@@ -18,10 +18,11 @@ when ODIN_OS == .Darwin {
     foreign import lib {
 		"lib/linux/libssl.a",
 		"lib/linux/libcrypto.a"
-    }
+    }// TODO(caleb): we may need to link against debug vs release builds here as well
 } else when ODIN_OS == .Windows {
     foreign import lib {
-	"lib/windows/libssl.lib"
+	"lib/windows/lib/ssl.lib",
+	"lib/windows/lib/crypto.lib"
     }
 }
 
